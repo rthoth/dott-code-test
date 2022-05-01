@@ -1,0 +1,7 @@
+/project/target/
+/target/
+/.idea/
+/.bsp/
+/project/project/
+/*.db
+/.attach_pid*
