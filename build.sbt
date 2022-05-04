@@ -11,5 +11,8 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.mapdb" % "mapdb" % "3.0.8",
       "io.spray" %% "spray-json" % "1.3.6"
-    )
+    ),
+    mainClass := Some("dott.Dott"),
+    assembly / assemblyJarName := "dott.jar",
+    assembly / mainClass := Some("dott.Dott")
   )

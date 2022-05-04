@@ -10,17 +10,18 @@ import scala.util.{Failure, Success, Try}
 
 object Dott extends App {
 
-  val BetweenGroupRegex = """^(\d+)-(\d+)$""".r
+  val BetweenRangeRegex = """^(\d+)-(\d+)$""".r
 
-  val BeforeThanGroupRegex = """^>(\d+)$""".r
+  val BeforeThanRangeRegex = """^>(\d+)$""".r
 
   (for {
     (start, end, groups) <- parseArguments()
     database <- Database(new File("./"))
+    _ <- Try(Console.out.println("Please wait, the report is being processed."))
     report <- new Reporter(database).report(start, end, groups)
   } yield {
     for ((range, (_, count)) <- report.data) {
-      Console.out.println(s"$RESET$BLUE_B$BLACK${range.toShow}: $count$RESET")
+      Console.out.println(s"${range.toShow} months: $count orders")
     }
   }) match {
     case Success(_) =>
@@ -32,10 +33,10 @@ object Dott extends App {
       Console.err.println(RESET)
   }
 
-  private def bg(start: Int, end: Int) = BetweenRangeDescriptor(start, end)
+  private def brd(start: Int, end: Int) = BetweenRangeDescriptor(start, end)
 
   //noinspection SameParameterValue
-  private def btg(quantity: Int) = BeforeThanRangeDescriptor(quantity)
+  private def btrd(quantity: Int) = BeforeThanRangeDescriptor(quantity)
 
   @inline
   private def invalidArgument[T](f: => T, message: String): T = {
@@ -53,17 +54,17 @@ object Dott extends App {
       require(start.compareTo(end) < 0, s"Invalid date range [$start-$end]!")
       val groupValues = args.drop(4)
       if (groupValues.isEmpty) {
-        (start, end, Seq(bg(1, 3), bg(4, 6), bg(7, 12), btg(12)))
+        (start, end, Seq(brd(1, 3), brd(4, 6), brd(7, 12), btrd(12)))
       } else {
 
         var groups = (for (group <- groupValues.view.dropRight(1)) yield group match {
-          case BetweenGroupRegex(s, e) => BetweenRangeDescriptor(s.toInt, e.toInt): RangeDescriptor
+          case BetweenRangeRegex(s, e) => BetweenRangeDescriptor(s.toInt, e.toInt): RangeDescriptor
           case _ => throw new IllegalArgumentException(s"Invalid group $group!")
         }).toVector
 
         groups :+= (groupValues.last match {
-          case BetweenGroupRegex(s, e) => BetweenRangeDescriptor(s.toInt, e.toInt)
-          case BeforeThanGroupRegex(q) => BeforeThanRangeDescriptor(q.toInt)
+          case BetweenRangeRegex(s, e) => BetweenRangeDescriptor(s.toInt, e.toInt)
+          case BeforeThanRangeRegex(q) => BeforeThanRangeDescriptor(q.toInt)
           case value => throw new IllegalArgumentException(s"Invalid group $value!")
         })
 

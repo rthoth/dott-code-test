@@ -22,10 +22,10 @@ class Reporter(database: Database) {
   }
 
   private def process(report: Report, order: Order): Report = {
-    Console.err.println(s"${Console.RESET}${Console.GREEN}${order.date}${Console.RESET}")
+    //    Console.err.println(s"${Console.RESET}${Console.GREEN}${order.date}${Console.RESET}")
 
     order.items.foldLeft(report) { (report, item) =>
-      Console.err.println(s"Product from ${item.product.createdAt}.")
+      //      Console.err.println(s"Product from ${item.product.createdAt}.")
       report.get(item.product.createdAt) match {
         case Some((range, count)) =>
           report.withValue(range, count + item.quantity)

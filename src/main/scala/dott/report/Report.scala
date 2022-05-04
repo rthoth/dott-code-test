@@ -6,7 +6,7 @@ import scala.collection.immutable.SortedMap
 object Report {
 
   def apply(ranges: Iterable[Range]): Report = {
-    new Report(SortedMap.from(ranges.map(range => (range, (range, 0L)))))
+    new Report(SortedMap.from(ranges.map(range => (range, (range, 0L))))(RangeOrdering.reverse))
   }
 }
 

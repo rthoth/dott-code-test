@@ -32,7 +32,7 @@ package object report {
           -compareWith(after, before)
 
         case (before: SpecificMoment, after: SpecificMoment) =>
-          before.dateTime.compareTo(after.dateTime)
+          -before.dateTime.compareTo(after.dateTime)
       }
     }
 

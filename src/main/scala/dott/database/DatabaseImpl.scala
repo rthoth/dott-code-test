@@ -6,15 +6,15 @@ import org.mapdb.{DBMaker, Serializer}
 import spray.json._
 
 import java.io.File
-import java.time.{Instant, OffsetDateTime}
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import scala.Console._
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.{Random, Try}
 import scala.jdk.CollectionConverters._
+import scala.util.{Random, Try}
 
 object DatabaseImpl {
 
@@ -64,7 +64,7 @@ object DatabaseImpl {
     processors: Int, count: Long): Unit = {
 
     if (start.compareTo(stop) < 0) {
-      val steps = createSteps(start, stop, 300, processors)
+      val steps = createSteps(start, stop, 600, processors)
       val futures = Future.traverse(steps) { current =>
         for {
           _ <- Future(createOrder(current, products, orders))
@@ -77,14 +77,14 @@ object DatabaseImpl {
 
       val nextStart = steps.last
       val newCount = count + steps.size
-      if (newCount % (1000 * processors) == 0)
-        Console.err.println(s"$RESET${CYAN}It has created $newCount orders until $nextStart.$RESET")
+      //      if (newCount % (1000 * processors) == 0)
+      //        Console.err.println(s"$RESET${CYAN}It has created $newCount orders until $nextStart.$RESET")
       createParallelOrders(nextStart, stop, products, orders, processors, newCount)
     }
   }
 
   def createRandomDatabase(directory: File, cause: Throwable): Try[Database] = Try {
-    Console.err.println(s"$RESET${RED}Creating a new fake random database.$RESET")
+    Console.err.println(s"$RESET${RED}Creating a new fake random database, please wait.$RESET")
 
     val now = OffsetDateTime.now()
     val begin = now.minus(5 * 365, ChronoUnit.DAYS)
@@ -94,13 +94,15 @@ object DatabaseImpl {
 
     try {
       createOrders(begin, now, createProducts(begin, now, products), orders)
+      Console.err.println(s"${RESET}${CYAN}It's been created ${products.size} products and ${orders.size} orders, since $begin.$RESET")
     } catch {
       case internal: Throwable =>
-        internal.printStackTrace(Console.err)
+      //        internal.printStackTrace(Console.err)
     } finally {
       products.close()
       orders.close()
     }
+
 
     new DatabaseImpl(directory)
   }
@@ -164,7 +166,7 @@ object DatabaseImpl {
     if (current.compareTo(stop) <= 0) {
       val product = newProduct(id, current)
 
-      Console.err.println(s"$RESET${GREEN}It has created product ${product.id}.$RESET")
+      //      Console.err.println(s"$RESET${GREEN}It has created product ${product.id}.$RESET")
 
       products.put(product.id, product.toJson.compactPrint)
       val nextCurrent = current
