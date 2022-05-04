@@ -7,16 +7,11 @@ package object report {
     override def compare(x: Range, y: Range): Int = {
       (x, y) match {
         case (BetweenRange(_, _, s1, e1), BetweenRange(_, _, s2, e2)) =>
-          if (e1 < s2) -1
-          else if (s1 > e2) 1
-          else if (s1 < s2) -1
-          else if (s1 > s2) 1
-          else if (e1 < e2) -1
-          else if (e1 > e2) 1
-          else 0
+          if (s1 != s2) s2 - s1
+          else e2 - e1
 
         case (before: BeforeThanRange, after: BetweenRange) =>
-           -compareWith(after, before)
+          -compareWith(after, before)
 
         case (before: BetweenRange, after: BeforeThanRange) =>
           compareWith(before, after)
@@ -42,25 +37,25 @@ package object report {
     }
 
     private def compareWith(specific: SpecificMoment, btre: BeforeThanRange): Int = {
-      specific.dateTime.compareTo(btre.offset)
+      if (specific.dateTime.compareTo(btre.offset) <= 0) 0
+      else 1
     }
 
     private def compareWith(specific: SpecificMoment, bre: BetweenRange): Int = {
-      val SpecificMoment(offset) = specific
+      val SpecificMoment(dateTime) = specific
       val BetweenRange(s, e, _, _) = bre
 
-      if (offset.compareTo(s) < 0) -1
-      else if (offset.compareTo(e) > 0) 1
+      if (dateTime.compareTo(s) < 0) -1
+      else if (dateTime.compareTo(e) > 0) 1
       else 0
     }
 
     private def compareWith(bre: BetweenRange, btre: BeforeThanRange): Int = {
-      val BetweenRange(_, _, s1, e1) = bre
+      val BetweenRange(_, _, s1, _) = bre
       val BeforeThanRange(_, e2) = btre
 
-      if (e1 < e2) -1
-      else if (s1 > e2) 1
-      else 0 // it's unexpected.
+      if (s1 != e2) e2 - s1
+      else 1
     }
   }
 }

@@ -25,10 +25,12 @@ class Reporter(database: Database) {
     Console.err.println(s"${Console.RESET}${Console.GREEN}${order.date}${Console.RESET}")
 
     order.items.foldLeft(report) { (report, item) =>
-
+      Console.err.println(s"Product from ${item.product.createdAt}.")
       report.get(item.product.createdAt) match {
-        case Some((range, count)) => report.withValue(range, count + item.quantity)
-        case _ => report
+        case Some((range, count)) =>
+          report.withValue(range, count + item.quantity)
+        case _ =>
+          report
       }
     }
   }
